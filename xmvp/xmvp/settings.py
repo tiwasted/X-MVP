@@ -27,6 +27,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'desktop_app.apps.DesktopAppConfig',
+    'services.apps.ServicesConfig',
+    'employees.apps.EmployeesConfig',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',

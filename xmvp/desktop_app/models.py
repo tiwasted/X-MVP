@@ -39,18 +39,3 @@ class Employer(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.login
 
-
-class Service(models.Model):
-    service_name = models.CharField(max_length=255)
-    sub_service = models.CharField(max_length=255)
-    price = models.IntegerField()
-    description = models.TextField(blank=True)
-    employer = models.ForeignKey(Employer, on_delete=models.CASCADE)
-
-
-class Employee(models.Model):
-    company = models.ForeignKey(Employer, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    phone_number = models.CharField(max_length=20)
-
