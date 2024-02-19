@@ -29,9 +29,11 @@ INSTALLED_APPS = [
     'desktop_app.apps.DesktopAppConfig',
     'services.apps.ServicesConfig',
     'employees.apps.EmployeesConfig',
+    'orders.apps.OrdersConfig',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    # 'django_extensions', # для проверки таблиц БД
 ]
 
 MIDDLEWARE = [
