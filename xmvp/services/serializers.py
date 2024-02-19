@@ -1,11 +1,13 @@
 from rest_framework import serializers
+from rest_framework.generics import ListAPIView
+
 from .models import Service, SubService
 
 
 class SubServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubService
-        fields = ['name', 'price', 'description']
+        fields = ['sub_service_name', 'price', 'description']
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -13,7 +15,7 @@ class ServiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Service
-        fields = ['name', 'subservices']
+        fields = ['service_name', 'subservices']
 
     def create(self, validated_data):
         subservices_data = validated_data.pop('subservices', [])
@@ -21,3 +23,15 @@ class ServiceSerializer(serializers.ModelSerializer):
         for subservice_data in subservices_data:
             SubService.objects.create(service=service, **subservice_data)
         return service
+
+
+class ServiceNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ['id', 'service_name']
+
+
+class SubServiceNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubService
+        fields = ['id', 'sub_service_name']

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Order
 from services.models import SubService, Service  # Предполагая, что у вас есть такая модель
 
+
 class OrderSerializer(serializers.ModelSerializer):
     sub_service_id = serializers.PrimaryKeyRelatedField(
         queryset=SubService.objects.all(),
