@@ -33,7 +33,6 @@ class ServiceNameListAPIView(APIView):
         return Response(serializer.data)
 
 
-
 class SubServiceListAPIView(ListAPIView):
     serializer_class = SubServiceNameSerializer
     permission_classes = [IsAuthenticated]
