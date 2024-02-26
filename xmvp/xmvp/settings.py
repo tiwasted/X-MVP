@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'desktop_app.apps.DesktopAppConfig',
+    'employers.apps.EmployersConfig',
     'services.apps.ServicesConfig',
     'employees.apps.EmployeesConfig',
     'orders.apps.OrdersConfig',
@@ -79,7 +79,7 @@ DATABASES = {
         'NAME': 'database',
         'USER': 'admin',
         'PASSWORD': 'passadmin1',
-        'HOST': 'db',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
@@ -127,7 +127,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-AUTH_USER_MODEL = 'desktop_app.Employer'
+AUTH_USER_MODEL = 'auth.User'
 
 
 REST_FRAMEWORK = {

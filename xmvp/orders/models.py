@@ -1,7 +1,7 @@
 from django.db import models
 
 from services.models import SubService
-from desktop_app.models import Employer
+from employers.models import Employer
 
 
 class Order(models.Model):

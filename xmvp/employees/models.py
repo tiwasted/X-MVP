@@ -1,6 +1,6 @@
 from django.db import models
 
-from desktop_app.models import Employer
+from employers.models import Employer
 
 
 class Employee(models.Model):
