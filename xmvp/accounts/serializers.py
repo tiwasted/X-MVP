@@ -1,31 +1,29 @@
-# from django.contrib.auth import authenticate
-# from rest_framework import serializers
-# from rest_framework_simplejwt.tokens import RefreshToken
-# from .models import CustomUser
-#
-#
-# class CustomUserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = CustomUser
-#         fields = ('id', 'username', 'email')
-#
-# class EmployerLoginSerializer(serializers.Serializer):
-#     username = serializers.CharField()
-#     password = serializers.CharField(write_only=True)
-#     tokens = serializers.SerializerMethodField()
-#
-#     def get_tokens(self, obj):
-#         user = CustomUser.objects.get(username=obj['username'])
-#         refresh = RefreshToken.for_user(user)
-#         return {
-#             'refresh': str(refresh),
-#             'access': str(refresh.access_token),
-#         }
-#
-#     def validate(self, attrs):
-#         username = attrs.get('username')
-#         password = attrs.get('password')
-#         user = authenticate(username=username, password=password)
-#         if user and user.is_active:
-#             return {'username': user.username}
-#         raise serializers.ValidationError('Unable to log in with provided credentials.')
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from rest_framework.exceptions import ValidationError
+
+User = get_user_model()
+
+class CustomUserRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'phone', 'password')
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'email': {'required': False},  # Указываем, что поля не обязательны
+            'phone': {'required': False},
+        }
+
+    def validate(self, data):
+        """
+        Проверяем, что хотя бы одно из полей email или phone заполнено.
+        """
+        email = data.get('email')
+        phone = data.get('phone')
+        if not email and not phone:
+            raise ValidationError("Необходимо указать либо email, либо номер телефона.")
+        return data
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user

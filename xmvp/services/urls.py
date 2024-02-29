@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import ServiceListAPIView, ServiceDetailAPIView, ServiceNameListAPIView, SubServiceListAPIView
 
+
 urlpatterns = [
     path('create/', ServiceListAPIView.as_view(), name='service-list'),
     path('services/<int:pk>/', ServiceDetailAPIView.as_view(), name='service-detail'),

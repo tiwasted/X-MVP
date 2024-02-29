@@ -4,7 +4,6 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -16,7 +15,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -26,14 +24,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'employers.apps.EmployersConfig',
-    'services.apps.ServicesConfig',
+
+    # Пользователи
+    'accounts.apps.AccountsConfig',
+    'clients.apps.ClientsConfig',
     'employees.apps.EmployeesConfig',
+    'employers.apps.EmployersConfig',
+
+    # Услуги и заказы
+    'services.apps.ServicesConfig',
     'orders.apps.OrdersConfig',
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'corsheaders',
-    # 'django_extensions', # для проверки таблиц БД
+
+    # Подключаемые библиотеки
+    'rest_framework',  #
+    'rest_framework_simplejwt',  #
+    'corsheaders',  #
+    'django_extensions',  # для работы с БД
+    'djoser',  #
 ]
 
 MIDDLEWARE = [
@@ -69,7 +76,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'xmvp.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -83,7 +89,6 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -103,7 +108,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -115,7 +119,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -126,16 +129,15 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
-AUTH_USER_MODEL = 'auth.User'
-
+AUTHENTICATION_BACKENDS = ['accounts.backends.AuthBackend']
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
-
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
@@ -175,4 +177,16 @@ SIMPLE_JWT = {
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
+}
+
+DJOSER = {
+    'LOGIN_FIELD': 'email',  # или 'phone', если вы используете телефон в качестве основного идентификатора
+    'USER_CREATE_PASSWORD_RETYPE': True,
+    'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
+    'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
+    'TOKEN_MODEL': None,
+
+    'SERIALIZERS': {
+        'user_create': 'accounts.serializers.CustomUserCreateSerializer',
+    },
 }

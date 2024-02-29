@@ -1,10 +1,8 @@
-from django.db import models
-
-from employers.models import Employer
-
-
-class Employee(models.Model):
-    employer = models.ForeignKey(Employer, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    phone_number = models.CharField(max_length=20)
+# from django.db import models
+# from accounts.models import CustomUser
+#
+#
+# class Employee(models.Model):
+#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='employee_profile')
+#     first_name = models.CharField(max_length=50)
+#     last_name = models.CharField(max_length=50)

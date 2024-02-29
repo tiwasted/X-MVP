@@ -8,6 +8,7 @@ from rest_framework.generics import ListAPIView
 from .models import Service, SubService
 from .serializers import ServiceSerializer, ServiceNameSerializer, SubServiceSerializer, SubServiceNameSerializer
 
+from employers.models import Employer
 
 # API для создания услуги
 class ServiceListAPIView(generics.ListCreateAPIView):
@@ -16,7 +17,8 @@ class ServiceListAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(employer=self.request.user)
+        employer = Employer.objects.get(user=self.request.user)
+        serializer.save(employer=employer)
 
 
 class ServiceDetailAPIView(generics.RetrieveDestroyAPIView):
