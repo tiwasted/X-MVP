@@ -178,15 +178,3 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
-
-DJOSER = {
-    'LOGIN_FIELD': 'email',  # или 'phone', если вы используете телефон в качестве основного идентификатора
-    'USER_CREATE_PASSWORD_RETYPE': True,
-    'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
-    'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
-    'TOKEN_MODEL': None,
-
-    'SERIALIZERS': {
-        'user_create': 'accounts.serializers.CustomUserCreateSerializer',
-    },
-}
