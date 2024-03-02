@@ -52,6 +52,7 @@ class EmployerRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
+# Авторизация и валидация пользователя Employer
 class EmployerAuthSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
