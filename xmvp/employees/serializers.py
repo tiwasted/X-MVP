@@ -30,33 +30,28 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
 # Авторизация и валидация пользователя Employee
 class EmployeeTokenObtainPairSerializer(TokenObtainPairSerializer):
-    phone = serializers.CharField(required=True)
+    phone = serializers.CharField(required=False)
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
     def validate(self, attrs):
-        phone = attrs.get('phone')
-        password = attrs.get('password')
+        phone = attrs.get('phone', None)
+        password = attrs['password']
 
         # Аутентификация пользователя
-        user = authenticate(request=self.context.get('request'), phone=phone, password=password)
+        user = None
+        if phone:
+            user = authenticate(phone=phone, password=password)
 
-        if not user:
+        if user is None:
             raise serializers.ValidationError("Неверные учетные данные.")
 
-        # Здесь предполагается, что у вас есть логика для определения, является ли пользователь сотрудником,
-        # например, проверка наличия связанного объекта профиля или проверка поля role
-        if not self.is_employee(user):
+        # Проверка роли пользователя
+        allowed_roles = ['employee']  # Список разрешённых ролей
+        print(f"User role: {user.role}, Allowed roles: {allowed_roles}")
+        if user.role not in allowed_roles:
             raise serializers.ValidationError("Доступ разрешен только для сотрудников.")
 
-        # Если проверка прошла успешно, вызываем родительский метод для генерации токенов
         data = super().validate(attrs)
-
-        # Можно добавить дополнительные данные в ответ, если это необходимо
-        # data['role'] = user.role
+        data['role'] = user.role
 
         return data
-
-    def is_employee(self, user):
-        # Пример функции для проверки, что пользователь имеет роль сотрудника
-        # Адаптируйте этот метод под вашу логику определения ролей
-        return user.role == 'employee'
