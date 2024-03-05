@@ -19,9 +19,10 @@ class AuthBackend(ModelBackend):
             user = CustomUser.objects.get(
                 Q(username=username) | Q(email=username) | Q(phone=username)
             )
-            if user.check_password(password) and self.user_can_authenticate(user):
+            if user and user.check_password(password) and self.user_can_authenticate(user):
                 return user
         except CustomUser.DoesNotExist:
+            # Возвращаем None, если пользователь не найден
             return None
 
     def user_can_authenticate(self, user):

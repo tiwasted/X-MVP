@@ -30,6 +30,24 @@ class EmployerRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"password": "Пароли не совпадают."})
         return data
 
+    def validate_username(self, value):
+        # Проверка Username
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Пользотель с таким username уже существует")
+        return value
+
+    def validate_phone(self, value):
+        # Проверка Phone
+        if User.objects.filter(phone=value).exists():
+            raise serializers.ValidationError("Пользотель с таким phone уже существует")
+        return value
+
+    def validate_email(self, value):
+        # Проверка Email
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Пользотель с таким email уже существует")
+        return value
+
     def create(self, validated_data):
         # Удаление данных, не относящихся к пользователю
         validated_data.pop('password2', None)
