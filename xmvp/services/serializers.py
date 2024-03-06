@@ -15,13 +15,14 @@ class ServiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Service
-        fields = ['service_name', 'subservices']
+        fields = ['service_name', 'employer', 'subservices']
 
     def create(self, validated_data):
-        subservices_data = validated_data.pop('subservices', [])
+        subservices_data = validated_data.pop('subservices', None)
         service = Service.objects.create(**validated_data)
-        for subservice_data in subservices_data:
-            SubService.objects.create(service=service, **subservice_data)
+        if subservice_data:
+            for subservice_data in subservices_data:
+                SubService.objects.create(service=service, **subservice_data)
         return service
 
 

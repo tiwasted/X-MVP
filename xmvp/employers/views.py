@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .serializers import EmployerRegistrationSerializer
-from .serializers import EmployerAuthSerializer
+from .serializers import EmployerTokenObtainPairSerializer
 
 
 class EmployerRegistrationAPIView(APIView):
@@ -19,15 +19,8 @@ class EmployerRegistrationAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class EmployerAuthView(APIView):
-    permission_classes = [AllowAny]
-
+class EmployerTokenObtainPairView(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = EmployerAuthSerializer(data=request.data)
+        serializer = EmployerTokenObtainPairSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-
-        # Теперь используем TokenObtainPairSerializer для генерации токена
-        token_serializer = TokenObtainPairSerializer(data=request.data)
-        token_serializer.is_valid(raise_exception=True)
-
-        return Response(token_serializer.validated_data, status=200)
+        return Response(serializer.validated_data, status=200)

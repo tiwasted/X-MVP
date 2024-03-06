@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from .models import Employer
@@ -9,9 +11,9 @@ User = get_user_model()
 class EmployerRegistrationSerializer(serializers.ModelSerializer):
     # Поля для пользователя
     email = serializers.EmailField(required=False, allow_blank=True)
-    phone = serializers.CharField(max_length=11, required=False, allow_blank=True)
+    # phone = serializers.CharField(max_length=11, required=False, allow_blank=True)
     password = serializers.CharField(write_only=True)
-    password2 = serializers.CharField(write_only=True, label="Confirm password")
+    password2 = serializers.CharField(write_only=True, label="Подтвердите пароль")
 
     # Поля для Employer
     company_name = serializers.CharField(required=True)
@@ -19,28 +21,13 @@ class EmployerRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'phone', 'password', 'password2', 'company_name', 'company_description']
+        fields = ['email', 'password', 'password2', 'company_name', 'company_description']
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, data):
-        # Убедиться, что хотя бы одно из полей email или phone заполнено
-        if not data.get('email') and not data.get('phone'):
-            raise serializers.ValidationError("Должен быть указан хотя бы один из контактов: email или phone.")
         if data['password'] != data['password2']:
             raise serializers.ValidationError({"password": "Пароли не совпадают."})
         return data
-
-    def validate_username(self, value):
-        # Проверка Username
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("Пользотель с таким username уже существует")
-        return value
-
-    def validate_phone(self, value):
-        # Проверка Phone
-        if User.objects.filter(phone=value).exists():
-            raise serializers.ValidationError("Пользотель с таким phone уже существует")
-        return value
 
     def validate_email(self, value):
         # Проверка Email
@@ -50,17 +37,14 @@ class EmployerRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Удаление данных, не относящихся к пользователю
-        validated_data.pop('password2', None)
+        email = validated_data.pop('email')
+        validated_data.pop('password2')
         password = validated_data.pop('password')
-        company_name = validated_data.pop('company_name', None)
-        company_description = validated_data.pop('company_description', None)
+        company_name = validated_data.pop('company_name')
+        company_description = validated_data.pop('company_description')
 
         # Создание пользователя
-        if validated_data.get('email'):
-            username = validated_data.get('email')
-        else:
-            username = validated_data.get('phone')
-        user = User(username=username, **validated_data)
+        user = User(email=email)
         user.set_password(password)
         user.save()
 
@@ -71,14 +55,25 @@ class EmployerRegistrationSerializer(serializers.ModelSerializer):
 
 
 # Авторизация и валидация пользователя Employer
-class EmployerAuthSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+class EmployerTokenObtainPairSerializer(TokenObtainPairSerializer):
+    # username_field = User.USERNAME_FIELD
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
 
-    def validate(self, data):
-        user = authenticate(username=data['username'], password=data['password'])
-        if user is None:
-            raise serializers.ValidationError("Неверные учетные данные.")
-        if not hasattr(user, 'employer_profile'):
-            raise serializers.ValidationError("Доступ разрешен только для работодателей.")
-        return user
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+
+        user = authenticate(request=self.context.get('request'), username=email, password=password)
+
+        if not user:
+            raise serializers.ValidationError('Невозможно аутентифицировать с указанными учетными данными.')
+
+        if user.role != 'employer':
+            raise serializers.ValidationError('Доступ разрешен только для работодателей.')
+
+        data = super().validate(attrs)
+
+        data['role'] = user.role
+
+        return data

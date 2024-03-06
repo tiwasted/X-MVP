@@ -6,9 +6,9 @@ User = get_user_model()
 
 
 class AuthBackend(ModelBackend):
-        supports_object_permissions = True
-        supports_anonymous_user = False
-        supports_inactive_user = False
+    supports_object_permissions = True
+    supports_anonymous_user = False
+    supports_inactive_user = False
 
     def authenticate(self, request, username=None, password=None, **kwargs):
         # Поиск пользователя по email или phone
