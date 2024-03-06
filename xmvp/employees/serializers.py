@@ -1,7 +1,9 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from .models import Employee
 
 User = get_user_model()
@@ -30,28 +32,33 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
 # Авторизация и валидация пользователя Employee
 class EmployeeTokenObtainPairSerializer(TokenObtainPairSerializer):
-    phone = serializers.CharField(required=False)
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    username_field = 'phone'
+
+    def __init__(self, *args, **kwargs):
+        # Переопределите поля, которые будут использоваться для аутентификации
+        super(EmployeeTokenObtainPairSerializer, self).__init__(*args, **kwargs)
+        self.fields[self.username_field] = serializers.CharField()
+        self.fields['password'] = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        phone = attrs.get('phone', None)
-        password = attrs['password']
+        # Возьмите учетные данные пользователя из атрибутов
+        username = attrs.get(self.username_field)
+        password = attrs.get("password")
 
-        # Аутентификация пользователя
-        user = None
-        if phone:
-            user = authenticate(phone=phone, password=password)
+        # Аутентифицируйте пользователя с помощью переданных учетных данных
+        user = authenticate(request=self.context.get('request'), username=username, password=password)
 
         if user is None:
-            raise serializers.ValidationError("Неверные учетные данные.")
+            raise serializers.ValidationError('Невозможно аутентифицировать с указанными учетными данными.')
 
-        # Проверка роли пользователя
-        allowed_roles = ['employee']  # Список разрешённых ролей
-        print(f"User role: {user.role}, Allowed roles: {allowed_roles}")
-        if user.role not in allowed_roles:
-            raise serializers.ValidationError("Доступ разрешен только для сотрудников.")
+        # Проверьте, что аутентифицированный пользователь имеет роль 'employee'
+        if user.role != 'employee':
+            raise serializers.ValidationError('Доступ разрешен только для сотрудников.')
 
+        # Если пользователь успешно прошел проверку, используйте метод базового класса для генерации токена
         data = super().validate(attrs)
+
+        # Добавьте дополнительную информацию в ответ, если это необходимо
         data['role'] = user.role
 
         return data
