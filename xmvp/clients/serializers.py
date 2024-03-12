@@ -1,33 +1,45 @@
 from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
-from django.contrib.auth import authenticate
-
-
+from django.contrib.auth.password_validation import validate_password
+from django.db import transaction
+from .models import Client
 
 User = get_user_model()
 
 
-class UserLoginSerializer(serializers.Serializer):
-    email_or_phone = serializers.CharField()
-    password = serializers.CharField()
+class ClientRegistrationSerializer(serializers.ModelSerializer):
+    phone = serializers.CharField(required=True)
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    first_name = serializers.CharField(max_length=30, required=True, allow_blank=True)
+    last_name = serializers.CharField(max_length=30, required=False, allow_blank=True)
+    address = serializers.CharField(max_length=60, required=False, allow_blank=True)
 
-    def validate(self, attrs):
-        email_or_phone = attrs.get('email_or_phone')
-        password = attrs.get('password')
+    class Meta:
+        model = User
+        fields = ('phone', 'password', 'first_name', 'last_name', 'address')
 
-        # Обновление механизма аутентификации для использования кастомного бэкенда
-        user = authenticate(request=self.context.get('request'), username=email_or_phone, password=password)
+    def validate_phone(self, value):
+        # Проверка Phone
+        if User.objects.filter(phone=value).exists():
+            raise serializers.ValidationError("Пользотель с таким phone уже существует")
+        return value
 
-        if user:
-            if not user.is_active:
-                raise serializers.ValidationError(('User is deactivated.'))
+    def create(self, validated_data):
+        with transaction.atomic():
+            user = User.objects.create_user(
+                phone=validated_data['phone'],
+                password=validated_data['password'],
+                email=None  # Указано явно, если email не используется или необязателен
+            )
+            user.role = 'client'
+            user.save()
 
-            data = {
-                'refresh': str(RefreshToken.for_user(user)),
-                'access': str(RefreshToken.for_user(user).access_token),
-            }
+            # Создание профиля клиента
+            Client.objects.create(
+                user=user,
+                first_name=validated_data.get('first_name', ''),
+                last_name=validated_data.get('last_name', ''),
+                address=validated_data.get('address', '')
+            )
 
-            return data
-        else:
-            raise serializers.ValidationError(('Unable to log in with provided credentials.'))
+            return user
