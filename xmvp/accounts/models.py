@@ -23,7 +23,16 @@ from .managers import UserManager
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, null=True, blank=True)
     phone = models.CharField(max_length=15, unique=True, null=True, blank=True)
-    role = models.CharField(max_length=15, blank=True, null=True)
+    EMPLOYER = 'employer'
+    EMPLOYEE = 'employee'
+    CLIENT = 'client'
+    ROLE_CHOICES = [
+        (EMPLOYER, 'Employer'),
+        (EMPLOYEE, 'Employee'),
+        (CLIENT, 'Client'),
+    ]
+
+    role = models.CharField(max_length=15, choices=ROLE_CHOICES)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
