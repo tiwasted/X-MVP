@@ -8,21 +8,11 @@ from rest_framework.generics import ListAPIView
 from .models import Service, SubService
 from .serializers import ServiceSerializer, ServiceNameSerializer, SubServiceSerializer, SubServiceNameSerializer
 
-from employers.models import Employer
-# from accounts.permissions import IsEmployer
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
-# API для создания услуги
-# class ServiceListAPIView(generics.ListCreateAPIView):
-#     queryset = Service.objects.all()
-#     serializer_class = ServiceSerializer
-#     permission_classes = [IsAuthenticated]
-#
-#     def perform_create(self, serializer):
-#         employer = Employer.objects.get(user=self.request.user)
-#         serializer.save(employer=employer)
-#
-#
 class ServiceDetailAPIView(generics.RetrieveDestroyAPIView):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
@@ -34,14 +24,18 @@ class CreateServiceView(APIView):
     def post(self, request, *args, **kwargs):
         # Проверка, является ли аутентифицированный пользователь работодателем
         print("Текущая роль пользователя:", request.user.role)
-        if request.user.role != 'employer':
-            return Response({"Ошибка": "Только работодатели могут создавать услуги."}, status=403)
+        if request.user.role != User.EMPLOYER:
+            return Response({"Ошибка": "Только работодатели могут создавать услуги."}, status=status.HTTP_403_FORBIDDEN)
+
+        employer = getattr(request.user, 'employer_profile', None)
+        if not employer:
+            return Response({"error": "Профиль Employer не найден."}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = ServiceSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(employer=request.user)
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+            serializer.save(employer=employer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ServiceNameListAPIView(APIView):

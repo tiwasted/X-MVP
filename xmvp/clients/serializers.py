@@ -10,7 +10,7 @@ User = get_user_model()
 class ClientRegistrationSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(required=True)
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    first_name = serializers.CharField(max_length=30, required=True, allow_blank=True)
+    first_name = serializers.CharField(max_length=30, required=False, allow_blank=True)
     last_name = serializers.CharField(max_length=30, required=False, allow_blank=True)
     address = serializers.CharField(max_length=60, required=False, allow_blank=True)
 
