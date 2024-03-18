@@ -2,13 +2,28 @@ from django.db import models
 from employers.models import Employer
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
 class Service(models.Model):
-    service_name = models.CharField(max_length=100)
-    employer = models.ForeignKey(Employer, on_delete=models.CASCADE, related_name='services')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
 
 
-class SubService(models.Model):
-    sub_service_name = models.CharField(max_length=100)
-    price = models.IntegerField()
+class EmployerService(models.Model):
+    employer = models.ForeignKey(Employer, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+
+    title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    service = models.ForeignKey(Service, related_name='subservices', on_delete=models.CASCADE)
+    price = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.title} by {self.employer.name}"

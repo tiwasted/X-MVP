@@ -1,24 +1,39 @@
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.generics import ListAPIView
-
-from .models import Service, SubService
-from .serializers import ServiceSerializer, ServiceNameSerializer, SubServiceSerializer, SubServiceNameSerializer
-
 from django.contrib.auth import get_user_model
+
+from .serializers import CategorySerializer
+from .serializers import ServiceSerializer
+from .serializers import EmployerServiceSerializer
+
+from .models import Category, Service, EmployerService
 
 User = get_user_model()
 
 
-class ServiceDetailAPIView(generics.RetrieveDestroyAPIView):
-    queryset = Service.objects.all()
-    serializer_class = ServiceSerializer
+class CategoryList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, reguest):
+        categories = Category.objects.all()
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data)
 
 
-class CreateServiceView(APIView):
+class ServiceList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, category_id=None):
+        services = Service.objects.filter(category_id=category_id) if category_id else Service.objects.all()
+        serializer = ServiceSerializer(services, many=True)
+        return Response(serializer.data)
+
+
+class CreateEmployerService(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -31,29 +46,8 @@ class CreateServiceView(APIView):
         if not employer:
             return Response({"error": "Профиль Employer не найден."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = ServiceSerializer(data=request.data)
+        serializer = EmployerServiceSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(employer=employer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ServiceNameListAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        services = Service.objects.all()
-        serializer = ServiceNameSerializer(services, many=True)
-        return Response(serializer.data)
-
-
-class SubServiceListAPIView(ListAPIView):
-    serializer_class = SubServiceNameSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """
-        Этот метод переопределяется для фильтрации подуслуг по идентификатору услуги.
-        """
-        service_id = self.kwargs['service_id']
-        return SubService.objects.filter(service__id=service_id)
