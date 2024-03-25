@@ -7,4 +7,14 @@ class OfferServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Offer
         fields = ['id', 'title', 'price']
-        # fields = ['id', 'title', 'description', 'price', 'employer_id']
+
+
+class OfferServiceDetailSerializer(serializers.ModelSerializer):
+    company_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Offer
+        fields = ['id', 'title', 'description', 'price', 'company_name']
+
+    def get_company_name(self, obj):
+        return obj.employer.company_name
