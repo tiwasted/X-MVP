@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
-from .models import Employer
+from employers.models import Employer
 
 User = get_user_model()
 

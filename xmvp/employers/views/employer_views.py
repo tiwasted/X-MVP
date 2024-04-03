@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import EmployerRegistrationSerializer
+from ..serializers.employer_serializers import EmployerRegistrationSerializer
 
 
 class EmployerRegistrationView(APIView):

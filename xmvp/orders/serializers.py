@@ -1,32 +1,24 @@
-# from rest_framework import serializers
-# from .models import Order
-# from services.models import SubService, Service  # Предполагая, что у вас есть такая модель
-#
-#
-# class OrderSerializer(serializers.ModelSerializer):
-#     sub_service_id = serializers.PrimaryKeyRelatedField(
-#         queryset=SubService.objects.all(),
-#         source='sub_service',
-#         write_only=True
-#     )
-#     # Предполагаем, что у SubService есть поле 'service' для обратной связи
-#     service_id = serializers.PrimaryKeyRelatedField(
-#         queryset=Service.objects.all(),
-#         source='sub_service.service',
-#         write_only=True,
-#         required=False  # Делаем необязательным, если service можно вывести из sub_service
-#     )
-#
-#     class Meta:
-#         model = Order
-#         fields = [
-#             'id',
-#             'service_id',  # Добавляем service_id в выводимые поля, если это необходимо
-#             'sub_service_id',
-#             'price',
-#             'date',
-#             'time',
-#             'address',
-#             'square_meters',
-#             'phone_number'
-#         ]
+from rest_framework import serializers
+from .models import Order, Task
+
+
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['id', 'description']
+
+
+class OrderCreateSerializer(serializers.ModelSerializer):
+    tasks = TaskSerializer(many=True)
+
+    class Meta:
+        model = Order
+        fields = ['id', 'offer', 'address', 'square_meters', 'service_date', 'service_time', 'tasks']
+        read_only_fields = ('id',)
+
+    def create(self, validated_data):
+        tasks_data = validated_data.pop('tasks')
+        order = Order.objects.create(**validated_data, user=self.context['request'].user)
+        for task_data in tasks_data:
+            Task.objects.create(order=order, **task_data)
+        return order
