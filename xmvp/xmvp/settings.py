@@ -36,11 +36,11 @@ INSTALLED_APPS = [
     'orders.apps.OrdersConfig',
 
     # Подключаемые библиотеки
-    'rest_framework',  #
-    'rest_framework_simplejwt',  #
-    'corsheaders',  #
-    'django_extensions',  # для работы с БД
-    'djoser',  #
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
+    #'django_extensions',  # для работы с БД
+    #'djoser',  #
 ]
 
 MIDDLEWARE = [
@@ -85,7 +85,7 @@ DATABASES = {
         'NAME': 'database',
         'USER': 'admin',
         'PASSWORD': 'passadmin1',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'PORT': '5432',
     }
 }

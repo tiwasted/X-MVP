@@ -2,8 +2,9 @@ version: '3.8'
 
 services:
   db:
-    build:
-      context: ./postgres # Укажите путь к папке с кастомным Dockerfile
+    image: db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: database
       POSTGRES_USER: admin
@@ -12,7 +13,9 @@ services:
       - "5433:5432"
 
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code

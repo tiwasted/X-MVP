@@ -6,6 +6,8 @@ WORKDIR /app
 
 # Копируйте файл зависимостей первым, чтобы воспользоваться кэшированием Docker
 COPY requirements.txt /app/
+
+# Установка зависимостей
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Копируйте весь проект в рабочую директорию
