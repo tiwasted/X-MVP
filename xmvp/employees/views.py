@@ -2,8 +2,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import EmployeeRegistrationSerializer
 from django.contrib.auth import get_user_model
+
+from .serializers import EmployeeRegistrationSerializer
+from accounts.models import CustomUser
 
 User = get_user_model()
 
@@ -12,11 +14,19 @@ class EmployeeRegistrationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        if request.user.role != User.EMPLOYER:
-            return Response({"error": "Только Employer может создавать Employee."}, status=status.HTTP_403_FORBIDDEN)
+        if request.user.role != 'employer':
+            return Response({"error": "Только Employer может создавать Employee."},
+                            status=status.HTTP_403_FORBIDDEN)
 
-        serializer = EmployeeRegistrationSerializer(data=request.data)
+        if not hasattr(request.user, 'employer_profile'):
+            return Response({"error": "Этот пользователь не связан с профилем работодателя."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        employer = request.user.employer_profile
+        print("Работодатель из профиля пользователя:", employer)
+        serializer = EmployeeRegistrationSerializer(data=request.data, context={'employer': employer})
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            user = serializer.save(employer=employer)
+            return Response({"message": "Employee создан успешно"},
+                            status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

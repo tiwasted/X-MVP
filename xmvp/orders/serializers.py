@@ -22,3 +22,15 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         for task_data in tasks_data:
             Task.objects.create(order=order, **task_data)
         return order
+
+
+class OrderUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['status', 'employee']
+
+    def update(self, instance, validated_data):
+        instance.status = validated_data.get('status', instance.status)
+        instance.employee = validated_data.get('employee', instance.employee)
+        instance.save
+        return instance
