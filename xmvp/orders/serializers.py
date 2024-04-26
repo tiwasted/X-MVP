@@ -8,6 +8,7 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = ['id', 'description']
 
 
+# Сериализатор создания заказа от Клиента
 class OrderCreateSerializer(serializers.ModelSerializer):
     tasks = TaskSerializer(many=True)
 
@@ -24,6 +25,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         return order
 
 
+# Сериализатор обработки заказа для Работодателя
+
+
+
 class OrderUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
@@ -34,3 +39,9 @@ class OrderUpdateSerializer(serializers.ModelSerializer):
         instance.employee = validated_data.get('employee', instance.employee)
         instance.save
         return instance
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['approved_time', 'assigned_employee']

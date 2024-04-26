@@ -3,12 +3,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework import generics
 
 from .models import Order
-from .serializers import OrderCreateSerializer, OrderUpdateSerializer
-from .permissions import IsOrderProcessor
+from .serializers import OrderCreateSerializer, OrderUpdateSerializer, OrderSerializer
+from .permissions import IsOrderProcessor, IsManagerReadOnly
 
 
+# Представление для создания заказа
 class OrderCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -30,3 +32,9 @@ class OrderProcessView(RetrieveUpdateAPIView):
         if user.is_staff:
             return super().get_queryset()
         return Order.objects.filter(employee=user)
+
+
+class OrderDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsManagerReadOnly]

@@ -20,7 +20,9 @@ class Order(models.Model):
     service_time = models.TimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=100, default='в ожидании')
-    employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_orders')
+
+    approved_time = models.DateTimeField(null=True, blank=True)
+    assigned_employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_orders')
 
     def __str__(self):
         return f"Order {self.id} - {self.offer.title} by {self.user.username}"
