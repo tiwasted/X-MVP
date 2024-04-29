@@ -29,8 +29,9 @@ class OrderDetailEmployer(serializers.ModelSerializer):
 
 # Сериализатор обработки заказа для Работодателя (работодатель может изменить время, дату и назначить свободного сотрудника)
 class OrderProcessingSerializer(serializers.ModelSerializer):
-    assigned_employee = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), required=False)
+    # assigned_employee = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), required=False)
+    status = serializers.ChoiceField(choices=Order.STATUS_CHOICES)
 
     class Meta:
         model = Order
-        fields = ['id', 'service_date', 'service_time', 'assigned_employee']
+        fields = ['id', 'service_date', 'service_time', 'status', 'assigned_employee_id']

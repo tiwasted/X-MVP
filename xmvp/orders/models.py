@@ -6,8 +6,9 @@ from employees.models import Employee
 
 class Order(models.Model):
     STATUS_CHOICES = (
-        ('waiting', 'В ожидании'),
-        ('processing', 'В обработке'),
+        ('in waiting', 'В ожидании'),
+        ('in processing', 'В обработке'),
+        ('in process', 'Выполняется'),
         ('completed', 'Выполнен'),
         ('cancelled', 'Отменен'),
     )
@@ -19,7 +20,7 @@ class Order(models.Model):
     service_date = models.DateField()
     service_time = models.TimeField()
     created_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=100, default='в ожидании')
+    status = models.CharField(max_length=100, default='В ожидании')
 
     approved_time = models.DateTimeField(null=True, blank=True)
     assigned_employee = models.ForeignKey(Employee, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_orders')

@@ -2,7 +2,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from django.utils import timezone
 
+from employees.models import Employee
 from orders.models import Order
 from ..serializers.order_serializers import OrderListEmployer, OrderDetailEmployer, OrderProcessingSerializer
 
@@ -25,36 +27,38 @@ class OrderEmployerDetailView(ListAPIView):
 
 # Представление обработки заказа от Работодателя
 class OrderProcessingViewSet(viewsets.ViewSet):
-    def retrieve(self, request, pk=None):
+    permission_classes = [IsAuthenticated]
+    def update(self, request, order_id=None):
         try:
-            order = Order.objects.get(pk=pk)
+            order = Order.objects.get(pk=order_id)
         except Order.DoesNotExist:
-            return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Заказ не найден"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = OrderProcessingSerializer(order)
-        return Response(serializer.data)
+        new_status = request.data.get('status')
+        new_service_date = request.data.get('service_date')
+        new_service_time = request.data.get('service_time')
+        new_assigned_employee_id = request.data.get('assigned_employee_id')
 
-    def partial_update(self, request, pk=None):
-        try:
-            order = Order.objects.get(pk=pk)
-        except Order.DoesNotExist:
-            return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        # Получаем идентификатор сотрудника из данных запроса
-        assigned_employee_id = request.data.get('assigned_employee')
-
-        if assigned_employee_id:
-            # Проверяем, существует ли сотрудник с указанным идентификатором
+        if new_status:
+            order.status = new_status
+        if new_service_date:
+            order.service_date = new_service_date
+        if new_service_time:
+            order.service_time = new_service_time
+        if new_assigned_employee_id:
             try:
-                employee = Employee.objects.get(pk=assigned_employee_id)
+                assigned_employee = Employee.objects.get(pk=new_assigned_employee_id)
+                order.assigned_employee = assigned_employee
             except Employee.DoesNotExist:
-                return Response({"error": "Employee not found"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": "Сотрудник не найден"}, status=status.HTTP_404_NOT_FOUND)
 
-            # Назначаем сотрудника на заказ
-            order.assigned_employee = employee
-
-        serializer = OrderProcessingSerializer(order, data=request.data, partial=True)
+        serializer = OrderProcessingSerializer(order, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(created_at=timezone.now())
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # order.created_at = timezone.now()
+        # order.save()
+        # serializer = OrderProcessingSerializer(order)
+        # return Response(serializer.data)
