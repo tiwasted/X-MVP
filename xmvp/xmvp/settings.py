@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Пользователи
-    'accounts.apps.AccountsConfig',
+    'users.apps.AccountsConfig',
     'clients.apps.ClientsConfig',
     'employees.apps.EmployeesConfig',
     'employers.apps.EmployersConfig',
@@ -129,10 +129,10 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'accounts.CustomUser'
+AUTH_USER_MODEL = 'users.CustomUser'
 
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.AuthBackend',
+    'users.backends.AuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 

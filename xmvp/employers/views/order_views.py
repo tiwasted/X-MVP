@@ -57,8 +57,3 @@ class OrderProcessingViewSet(viewsets.ViewSet):
             serializer.save(created_at=timezone.now())
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        # order.created_at = timezone.now()
-        # order.save()
-        # serializer = OrderProcessingSerializer(order)
-        # return Response(serializer.data)

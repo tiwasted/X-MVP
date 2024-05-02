@@ -7,7 +7,7 @@ from rest_framework import generics
 
 from .models import Order
 from .serializers import OrderCreateSerializer, OrderUpdateSerializer, OrderSerializer
-from .permissions import IsOrderProcessor, IsManagerReadOnly
+from .permissions import IsManagerReadOnly
 
 
 # Представление для создания заказа
@@ -25,7 +25,7 @@ class OrderCreateView(APIView):
 class OrderProcessView(RetrieveUpdateAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderUpdateSerializer
-    permission_classes = [IsAuthenticated, IsOrderProcessor]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user

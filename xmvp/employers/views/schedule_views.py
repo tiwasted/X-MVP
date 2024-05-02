@@ -11,6 +11,6 @@ class ScheduleViewSet(viewsets.ViewSet):
 
     def list(self, request):
         # Получить все заказы со статусом "В обработке"
-        orders_in_processing = Order.objects.filter(status='В обработке')
+        orders_in_processing = Order.objects.filter(status='in processing')
         serializer = OrderProcessingSerializer(orders_in_processing, many=True)
         return Response(serializer.data)
